@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blackjack Game</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://unpkg.com/htmx.org"></script>
+    <script>
+        function updateBalanceDisplay() {
+            const currency = document.getElementById("currency").value;
+            const cashBalance = document.getElementById("cashBalance").innerText;
+            const solanaBalance = document.getElementById("solanaBalance").innerText;
+
+            if (currency === "cash") {
+                document.getElementById("balanceDisplay").innerText = `Balance: $${cashBalance}`;
+            } else if (currency === "solana") {
+                document.getElementById("balanceDisplay").innerText = `Balance: ${solanaBalance} SOL`;
+            }
+        }
+
+        // Update balance display on page load
+        window.onload = updateBalanceDisplay;
+    </script>
+</head>
+<body>
+    <!-- Balance Display and Currency Selector -->
+    <div class="balance-container">
+        <div id="balanceDisplay"></div>
+        <select id="currency" onchange="updateBalanceDisplay()">
+            <option value="cash">Cash (USD)</option>
+            <option value="solana">Solana (SOL)</option>
+        </select>
+    </div>
+
+    <!-- Hidden elements to store balance values -->
+    <div id="cashBalance" style="display: none;">{{.CashBalance}}</div>
+    <div id="solanaBalance" style="display: none;">{{.SolanaBalance}}</div>
+
+    <!-- Betting Section -->
+    <div class="betting-container">
+        <h2>Place Your Bet</h2>
+        <form id="betForm" hx-post="/blackjack/game/{{.GameID}}/bet" hx-target=".table" hx-swap="outerHTML">
+            <label for="betCurrency">Currency:</label>
+            <select id="betCurrency" name="betCurrency" required>
+                <option value="cash">Cash (USD)</option>
+                <option value="solana">Solana (SOL)</option>
+            </select>
+            <br><br>
+            <label for="betAmount">Amount:</label>
+            <input type="number" id="betAmount" name="betAmount" step="0.01" min="0" required>
+            <br><br>
+            <button type="submit">Place Bet</button>
+        </form>
+    </div>
+
+    <!-- Rest of the game UI -->
+    <div class="table">
+        <!-- Dealer Section -->
+        <div class="dealer">
+            <h2>Dealer</h2>
+            <div class="hand">
+                {{if .Dealer}}
+                    {{if .DealerHidden}}
+                        <img src="{{index .Dealer 0 | cardImagePath}}" alt="Dealer Card" class="card">
+                        <img src="/static/images/cards/back.png" alt="Hidden Card" class="card">
+                    {{else}}
+                        {{range .Dealer}}
+                            <img src="{{. | cardImagePath}}" alt="Dealer Card" class="card">
+                        {{end}}
+                    {{end}}
+                {{else}}
+                    <div class="card">No cards yet</div>
+                {{end}}
+            </div>
+            <div class="score">Score: {{if .DealerHidden}}?{{else}}{{.DealerScore}}{{end}}</div>
+        </div>
+
+        <!-- Deck Image -->
+        <div class="deck">
+            <img src="/static/images/deck.png" alt="Deck of Cards">
+        </div>
+
+        <!-- Player Section -->
+        <div class="player">
+            <h2>Player</h2>
+            <p>Bet: {{.BetAmount}} {{.BetCurrency}}</p>  <!-- Keep the bet here, but not in the betting form -->
+            <div class="hand">
+                {{if .Player}}
+                    {{range .Player}}
+                        <img src="{{. | cardImagePath}}" alt="Player Card" class="card">
+                    {{end}}
+                {{else}}
+                    <div class="card">No cards yet</div>
+                {{end}}
+            </div>
+            <div class="score">Score: {{.PlayerScore}}</div>
+        </div>
+
+        <!-- Game Actions -->
+        <div class="actions">
+            {{if not .GameOver}}
+                <button hx-post="/blackjack/game/{{.GameID}}/deal" hx-target=".table" hx-swap="outerHTML">Deal</button>
+                <button hx-post="/blackjack/game/{{.GameID}}/hit" hx-target=".table" hx-swap="outerHTML">Hit</button>
+                <button hx-post="/blackjack/game/{{.GameID}}/stand" hx-target=".table" hx-swap="outerHTML">Stand</button>
+            {{else}}
+                <button onclick="window.location.reload()">Play Again</button>
+            {{end}}
+        </div>
+
+        <!-- Game Over Message -->
+        {{if .GameOver}}
+            <div class="result">
+                {{if gt .PlayerScore 21}}
+                    <p>You busted!</p>
+                {{else if gt .DealerScore 21}}
+                    <p>Dealer busted! You win!</p>
+                {{else if gt .PlayerScore .DealerScore}}
+                    <p>You win!</p>
+                {{else if gt .DealerScore .PlayerScore}}
+                    <p>You lose!</p>
+                {{else}}
+                    <p>It's a draw!</p>
+                {{end}}
+            </div>
+        {{end}}
+    </div>
+</body>
+</html>

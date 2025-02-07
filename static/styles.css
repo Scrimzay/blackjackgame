@@ -1,0 +1,75 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: green;
+    color: white;
+    text-align: center;
+}
+
+.table {
+    margin: 50px auto;
+    padding: 20px;
+    border: 2px solid gold;
+    width: 50%;
+}
+
+.dealer, .player {
+    margin: 20px 0;
+}
+
+.hand {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.card {
+    padding: 10px;
+    border: 1px solid white;
+    border-radius: 5px;
+    background-color: white;
+    color: black;
+    width: 60px;
+    text-align: center;
+}
+
+.hidden {
+    background-color: gray;
+    color: gray;
+}
+
+.deck img {
+    width: 100px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.actions {
+    margin-top: 20px;
+}
+
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+.result {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.balance-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#currency {
+    margin-left: 10px;
+    padding: 5px;
+    font-size: 16px;
+}
